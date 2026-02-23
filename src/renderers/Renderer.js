@@ -84,7 +84,9 @@ export class Renderer {
     }
 
     drawBots(bots) {
+        if (!bots) return;
         bots.forEach(bot => {
+            if (!bot) return;
             // Floor shadow
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
             this.ctx.beginPath();

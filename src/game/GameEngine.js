@@ -4,6 +4,7 @@ import { WaveManager } from './WaveManager';
 import { MapGenerator } from './MapGenerator';
 import { Renderer } from '../renderers/Renderer';
 import { checkCircleCollision, checkCircleRectCollision } from '../physics/Collisions';
+import { errorReporter } from '../utils/ErrorReporter';
 
 export class GameEngine {
     constructor(canvas, inputs, onGameOver) {
@@ -47,13 +48,18 @@ export class GameEngine {
     loop(timestamp) {
         if (!this.isRunning) return;
 
-        const deltaTime = timestamp - this.lastTime;
-        this.lastTime = timestamp;
+        try {
+            const deltaTime = timestamp - this.lastTime;
+            this.lastTime = timestamp;
 
-        this.update(deltaTime, this.inputs.current);
-        this.render();
+            this.update(deltaTime, this.inputs.current);
+            this.render();
 
-        requestAnimationFrame(this.loop);
+            requestAnimationFrame(this.loop);
+        } catch (error) {
+            errorReporter.report(error);
+            this.stop();
+        }
     }
 
     update(dt, inputs) {
