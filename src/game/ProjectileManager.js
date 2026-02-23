@@ -5,8 +5,8 @@ export class ProjectileManager {
         this.projectiles = [];
     }
 
-    addProjectile(x, y, angle) {
-        this.projectiles.push(new Projectile(x, y, angle));
+    addProjectile(x, y, angle, isEnemy = false) {
+        this.projectiles.push(new Projectile(x, y, angle, isEnemy));
     }
 
     update(dt, width, height) {

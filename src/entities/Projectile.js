@@ -1,5 +1,5 @@
 export class Projectile {
-    constructor(x, y, angle) {
+    constructor(x, y, angle, isEnemy = false) {
         this.x = x;
         this.y = y;
         this.angle = angle;
@@ -8,6 +8,7 @@ export class Projectile {
         this.active = true;
         this.distanceTraveled = 0;
         this.maxRange = 800; // Projectile range
+        this.isEnemy = isEnemy;
     }
 
     update(dt) {

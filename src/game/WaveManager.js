@@ -18,12 +18,14 @@ export class WaveManager {
             else if (side === 2) { x = Math.random() * this.width; y = this.height + 50; } // Bottom
             else { x = -50; y = Math.random() * this.height; } // Left
 
-            this.bots.push(new Bot(x, y));
+            // Diversify: 30% chance to spawn a Volt-like enemy
+            const charKey = Math.random() < 0.3 ? 'volt' : 'bot';
+            this.bots.push(new Bot(x, y, charKey));
         }
     }
 
-    update(dt, player) {
-        this.bots.forEach(bot => bot.update(dt, player));
+    update(dt, player, projectileManager) {
+        this.bots.forEach(bot => bot.update(dt, player, projectileManager));
     }
 
     getBots() {

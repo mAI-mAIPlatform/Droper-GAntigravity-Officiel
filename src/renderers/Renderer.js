@@ -28,6 +28,12 @@ export class Renderer {
     }
 
     drawPlayer(player) {
+        // Floor shadow
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        this.ctx.beginPath();
+        this.ctx.ellipse(player.x, player.y + player.radius * 0.8, player.radius * 0.8, player.radius * 0.4, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+
         // Character glow
         this.ctx.shadowBlur = 15;
         this.ctx.shadowColor = '#00e5ff';
@@ -79,6 +85,12 @@ export class Renderer {
 
     drawBots(bots) {
         bots.forEach(bot => {
+            // Floor shadow
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            this.ctx.beginPath();
+            this.ctx.ellipse(bot.x, bot.y + bot.radius * 0.8, bot.radius * 0.8, bot.radius * 0.4, 0, 0, Math.PI * 2);
+            this.ctx.fill();
+
             this.ctx.shadowBlur = 10;
             this.ctx.shadowColor = '#ff3d00';
 
@@ -112,5 +124,35 @@ export class Renderer {
         });
 
         this.ctx.shadowBlur = 0;
+    }
+
+    drawWalls(walls) {
+        walls.forEach(wall => {
+            const depth = 20;
+
+            // Draw shadow side (2.5D effect)
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            this.ctx.beginPath();
+            this.ctx.moveTo(wall.x, wall.y + wall.height);
+            this.ctx.lineTo(wall.x + wall.width, wall.y + wall.height);
+            this.ctx.lineTo(wall.x + wall.width + depth / 2, wall.y + wall.height + depth);
+            this.ctx.lineTo(wall.x + depth / 2, wall.y + wall.height + depth);
+            this.ctx.fill();
+
+            // Draw top face
+            this.ctx.fillStyle = 'rgba(20, 20, 30, 0.8)';
+            this.ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+
+            // Draw glowing border
+            this.ctx.strokeStyle = '#00e5ff';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+
+            // Subtle inner glow
+            this.ctx.shadowBlur = 5;
+            this.ctx.shadowColor = '#00e5ff';
+            this.ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+            this.ctx.shadowBlur = 0;
+        });
     }
 }

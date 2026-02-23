@@ -1,8 +1,9 @@
 import { Volt } from '../entities/heroes/Volt';
 import { ProjectileManager } from './ProjectileManager';
 import { WaveManager } from './WaveManager';
+import { MapGenerator } from './MapGenerator';
 import { Renderer } from '../renderers/Renderer';
-import { checkCircleCollision } from '../physics/Collisions';
+import { checkCircleCollision, checkCircleRectCollision } from '../physics/Collisions';
 
 export class GameEngine {
     constructor(canvas, inputs, onGameOver) {
@@ -18,7 +19,11 @@ export class GameEngine {
         // Systems
         this.projectileManager = new ProjectileManager();
         this.waveManager = new WaveManager(this.width, this.height);
+        this.mapGenerator = new MapGenerator();
         this.renderer = new Renderer(this.ctx);
+
+        // Map setup
+        this.walls = this.mapGenerator.generateMap('map1');
 
         // Game Objects
         this.player = new Volt(this.width / 2, this.height / 2);
@@ -54,14 +59,25 @@ export class GameEngine {
     update(dt, inputs) {
         if (!inputs || !this.isRunning) return;
 
+        const prevX = this.player.x;
+        const prevY = this.player.y;
+
         // Update player
         this.player.update(dt, inputs, this.width, this.height, this.projectileManager);
+
+        // Wall collisions for player
+        this.walls.forEach(wall => {
+            if (checkCircleRectCollision(this.player, wall)) {
+                this.player.x = prevX;
+                this.player.y = prevY;
+            }
+        });
 
         // Update projectiles
         this.projectileManager.update(dt, this.width, this.height);
 
         // Update bots
-        this.waveManager.update(dt, this.player);
+        this.waveManager.update(dt, this.player, this.projectileManager);
 
         // Collisions
         this.handleCollisions();
@@ -71,29 +87,48 @@ export class GameEngine {
         const bots = this.waveManager.getBots();
         const projectiles = this.projectileManager.getProjectiles();
 
+        // Projectile collisions with walls
+        projectiles.forEach(p => {
+            if (!p.active) return;
+            this.walls.forEach(wall => {
+                if (p.x > wall.x && p.x < wall.x + wall.width && p.y > wall.y && p.y < wall.y + wall.height) {
+                    p.active = false;
+                }
+            });
+        });
+
         bots.forEach(bot => {
+            // Bot Wall Collision
+            const bPrevX = bot.x;
+            const bPrevY = bot.y;
+            this.walls.forEach(wall => {
+                if (checkCircleRectCollision(bot, wall)) {
+                    bot.x = bPrevX;
+                    bot.y = bPrevY;
+                }
+            });
+
             // Player vs Bot
             if (checkCircleCollision(this.player, bot)) {
-                this.player.hp -= 0.5; // Damage over time on contact
-                if (this.player.hp <= 0) {
-                    this.gameOver();
-                }
+                this.player.hp -= 0.5;
+                if (this.player.hp <= 0) this.gameOver();
             }
 
-            // Projectile vs Bot
+            // Projectile vs Bot/Player
             projectiles.forEach(p => {
-                if (p.active && checkCircleCollision(p, bot)) {
+                if (!p.active) return;
+
+                if (!p.isEnemy && checkCircleCollision(p, bot)) {
                     p.active = false;
                     bot.hp -= 10;
-
                     if (bot.hp <= 0) {
                         this.waveManager.removeBot(bot);
-
-                        // Simple respawn for infinite loop
-                        if (this.waveManager.getBots().length < 3) {
-                            this.waveManager.spawnWave(1);
-                        }
+                        if (this.waveManager.getBots().length < 3) this.waveManager.spawnWave(1);
                     }
+                } else if (p.isEnemy && checkCircleCollision(p, this.player)) {
+                    p.active = false;
+                    this.player.hp -= 5; // Reduced damage for game balance
+                    if (this.player.hp <= 0) this.gameOver();
                 }
             });
         });
@@ -126,6 +161,7 @@ export class GameEngine {
     render() {
         this.renderer.clear(this.width, this.height);
         this.renderer.drawGrid(this.width, this.height);
+        this.renderer.drawWalls(this.walls);
         this.renderer.drawBots(this.waveManager.getBots());
         this.renderer.drawProjectiles(this.projectileManager.getProjectiles());
         this.renderer.drawPlayer(this.player);
