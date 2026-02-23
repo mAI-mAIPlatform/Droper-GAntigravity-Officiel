@@ -74,18 +74,25 @@ export class GameEngine {
         bots.forEach(bot => {
             // Player vs Bot
             if (checkCircleCollision(this.player, bot)) {
-                this.gameOver();
+                this.player.hp -= 0.5; // Damage over time on contact
+                if (this.player.hp <= 0) {
+                    this.gameOver();
+                }
             }
 
             // Projectile vs Bot
             projectiles.forEach(p => {
-                if (checkCircleCollision(p, bot)) {
+                if (p.active && checkCircleCollision(p, bot)) {
                     p.active = false;
-                    this.waveManager.removeBot(bot);
+                    bot.hp -= 10;
 
-                    // Simple respawn for infinite loop
-                    if (this.waveManager.getBots().length < 3) {
-                        this.waveManager.spawnWave(1);
+                    if (bot.hp <= 0) {
+                        this.waveManager.removeBot(bot);
+
+                        // Simple respawn for infinite loop
+                        if (this.waveManager.getBots().length < 3) {
+                            this.waveManager.spawnWave(1);
+                        }
                     }
                 }
             });
@@ -95,6 +102,25 @@ export class GameEngine {
     gameOver() {
         this.isRunning = false;
         if (this.onGameOver) this.onGameOver();
+    }
+
+    getHUDData() {
+        return {
+            player: {
+                x: this.player.x,
+                y: this.player.y,
+                hp: this.player.hp,
+                maxHp: this.player.maxHp,
+                name: this.player.name
+            },
+            bots: this.waveManager.getBots().map(b => ({
+                x: b.x,
+                y: b.y,
+                hp: b.hp,
+                maxHp: b.maxHp,
+                name: b.name
+            }))
+        };
     }
 
     render() {

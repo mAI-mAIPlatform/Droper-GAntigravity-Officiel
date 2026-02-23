@@ -1,17 +1,25 @@
+import data from '../../data/characters.json';
+import { assetLoader } from '../../utils/AssetLoader';
+
 export class Volt {
     constructor(x, y) {
+        const stats = data.volt;
         this.x = x;
         this.y = y;
-        this.speed = 0.35;
-        this.radius = 20;
+        this.speed = stats.speed;
+        this.radius = stats.radius;
         this.angle = 0;
         this.lastShot = 0;
-        this.shootCooldown = 150; // ms
+        this.shootCooldown = stats.shootCooldown;
+        this.name = stats.name;
+        this.hp = stats.hp;
+        this.maxHp = stats.maxHp;
         this.img = null;
 
         if (typeof window !== 'undefined') {
-            this.img = new Image();
-            this.img.src = '/assets/characters/volt.png';
+            assetLoader.loadImage('volt', stats.asset).then(img => {
+                this.img = img;
+            });
         }
     }
 

@@ -76,4 +76,41 @@ export class Renderer {
 
         this.ctx.shadowBlur = 0;
     }
+
+    drawBots(bots) {
+        bots.forEach(bot => {
+            this.ctx.shadowBlur = 10;
+            this.ctx.shadowColor = '#ff3d00';
+
+            if (bot.img && bot.img.complete) {
+                this.ctx.save();
+                this.ctx.translate(bot.x, bot.y);
+                this.ctx.rotate(bot.angle + Math.PI / 2);
+                this.ctx.drawImage(bot.img, -bot.radius, -bot.radius, bot.radius * 2, bot.radius * 2);
+                this.ctx.restore();
+            } else {
+                // Fallback
+                this.ctx.fillStyle = 'rgba(255, 61, 0, 0.2)';
+                this.ctx.strokeStyle = '#ff3d00';
+                this.ctx.lineWidth = 2;
+
+                this.ctx.beginPath();
+                this.ctx.arc(bot.x, bot.y, bot.radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                // Hostile eye/core
+                this.ctx.fillStyle = '#fff';
+                this.ctx.beginPath();
+                this.ctx.arc(
+                    bot.x + Math.cos(bot.angle) * 10,
+                    bot.y + Math.sin(bot.angle) * 10,
+                    4, 0, Math.PI * 2
+                );
+                this.ctx.fill();
+            }
+        });
+
+        this.ctx.shadowBlur = 0;
+    }
 }
