@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { GameEngine } from '../game/GameEngine';
 import { useInputs } from '../hooks/useInputs';
 
-const CanvasBoard = () => {
+const CanvasBoard = ({ onGameOver }) => {
     const canvasRef = useRef(null);
     const engineRef = useRef(null);
     const inputs = useInputs();
@@ -13,7 +13,7 @@ const CanvasBoard = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
 
-            const engine = new GameEngine(canvas, inputs);
+            const engine = new GameEngine(canvas, inputs, onGameOver);
             engineRef.current = engine;
             engine.start();
 

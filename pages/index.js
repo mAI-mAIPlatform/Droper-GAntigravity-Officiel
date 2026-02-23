@@ -2,12 +2,25 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import MainMenu from '../src/components/ui/MainMenu';
 import CanvasBoard from '../src/components/CanvasBoard';
+import GameOverScreen from '../src/components/ui/GameOverScreen';
 
 export default function Home() {
-    const [gameState, setGameState] = useState('MENU'); // 'MENU', 'PLAYING'
+    const [gameState, setGameState] = useState('MENU'); // 'MENU', 'PLAYING', 'GAME_OVER'
 
     const handlePlay = () => {
         setGameState('PLAYING');
+    };
+
+    const handleGameOver = () => {
+        setGameState('GAME_OVER');
+    };
+
+    const handleRestart = () => {
+        setGameState('PLAYING');
+    };
+
+    const handleMenu = () => {
+        setGameState('MENU');
     };
 
     return (
@@ -22,8 +35,12 @@ export default function Home() {
                     <MainMenu onPlay={handlePlay} />
                 )}
 
-                {gameState === 'PLAYING' && (
-                    <CanvasBoard />
+                {(gameState === 'PLAYING' || gameState === 'GAME_OVER') && (
+                    <CanvasBoard onGameOver={handleGameOver} />
+                )}
+
+                {gameState === 'GAME_OVER' && (
+                    <GameOverScreen onRestart={handleRestart} onMenu={handleMenu} />
                 )}
 
                 {/* Background decorative elements */}
